@@ -1,0 +1,6 @@
+<?php
+$MESS["L151_FEEDBACK_TEMPLATE_MAIN_TEXT"] = "Оцените качество обслуживания";
+$MESS["L151_FEEDBACK_TEMPLATE_NAME"] = "Ваше имя";
+$MESS["L151_FEEDBACK_TEMPLATE_RATING"] = "Оценка";
+$MESS["L151_FEEDBACK_TEMPLATE_COMMENT"] = "Комментарий";
+$MESS["L151_FEEDBACK_TEMPLATE_SUBMIT"] = "Отправить";

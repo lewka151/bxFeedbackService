@@ -1,0 +1,2 @@
+<?php
+$MESS["L151_FEEDBACK_HIGHLOADBLOCK_ID"] = "HighloadBlock";
