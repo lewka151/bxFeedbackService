@@ -20,8 +20,8 @@ class FeedbackService extends \CBitrixComponent implements \Bitrix\Main\Engine\C
     public function configureActions()
     {
         return [
-            'sendForm' => [
-                'prefilters' => [
+            "sendForm" => [
+                "prefilters" => [
                     new ActionFilter\HttpMethod(
                         [
                             ActionFilter\HttpMethod::METHOD_POST
