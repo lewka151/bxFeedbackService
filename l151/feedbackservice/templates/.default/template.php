@@ -62,7 +62,6 @@ $this->addExternalJS("//cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/boot
           
       <hr class="my-4">
 
-      <input type="hidden" id="aj-form-hblockid" name="hblockid" value="<?=$arResult["HBLOCK_ID"]?>">
       <input type="hidden" id="aj-form-detected" name="detected" value="">
 
       <button id="aj-form-submit" class="w-100 btn btn-primary btn-lg" type="submit"><?=Loc::GetMessage("L151_FEEDBACK_TEMPLATE_SUBMIT")?></button>
@@ -70,3 +69,10 @@ $this->addExternalJS("//cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/boot
     </form>
   </div>
 </div>
+
+<script>
+    var ajFormParams = <?=\Bitrix\Main\Web\Json::encode([
+      "componentName"     => $this->getComponent()->getName(),
+      "signedParameters"  => $this->getComponent()->getSignedParameters(),
+      ])?>;
+</script>

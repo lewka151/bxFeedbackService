@@ -5,9 +5,9 @@ if(!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED!==true) die();
 
 require_once('lib/vendor/autoload.php');
 
-use Bitrix\Main\Engine\ActionFilter;
-use Bitrix\Main\Error;
-use Bitrix\Main\Localization\Loc;
+use Bitrix\Main\Engine\ActionFilter,
+    Bitrix\Main\Error,
+    Bitrix\Main\Localization\Loc;
 
 \Bitrix\Main\Loader::includeModule('highloadblock');
 Loc::loadMessages(__FILE__);
@@ -33,64 +33,66 @@ class FeedbackService extends \CBitrixComponent implements \Bitrix\Main\Engine\C
         ];
     }
 
+    protected function listKeysSignedParameters()
+    {
+        return [
+            "HBLOCK_ID",
+        ];
+    }
+
     public function onPrepareComponentParams($arParams)
     {
         $this->errorCollection = new \Bitrix\Main\ErrorCollection();
         return $arParams;
     }
 
+
+    /**
+     * * @throws \Bitrix\Main\ObjectException 
+     */
     public function sendFormAction($post)
-    {
-        if( empty($post['detected']) )
-        {
-            $response = ["message" => Loc::GetMessage("L151_FEEDBACK_FINAL_MESSAGE")];
+    {   
+        $this->getSignedParameters();
+        $response = ["message" => Loc::GetMessage("L151_FEEDBACK_FINAL_MESSAGE")];
 
-            $post["hblockid"] = $this->decodeParam($post["hblockid"]);
-
-            $validator = new \Rakit\Validation\Validator;
-            $validation = $validator->validate($post, [
-                "name"                  => "required",
-                "email"                 => "required|email",
-                "rating"                => "required|numeric|min:1|max:5",
-                "comment"               => "required|max:500",
-                "hblockid"              => "required|numeric",
-            ]);
-
-            if(!$validation->fails())
-            {   
-                $hblockEntity = \Bitrix\Highloadblock\HighloadBlockTable::compileEntity($post["hblockid"]);
-                $hblockDataClass = $hblockEntity->getDataClass();
-                $hblockFields = [
-                    "UF_NAME"         => $post["name"],
-                    "UF_EMAIL"        => $post["email"],
-                    "UF_RATION"       => $post["rating"],
-                    "UF_COMMENT"      => $post["comment"],
-                ];
-
-                $hblockResult = $hblockDataClass::add($hblockFields);
-
-                if($hblockResult->isSuccess())
-                {
-                    $response["mail_id"] = $this->sendEmail($post);
-                    return $response;
-                }
-                else
-                {
-                    $this->errorCollection[] = new Error( $hblockResult->getErrors() );
-                    return null;
-                }
-            }
-            else
-            {
-                $this->errorCollection[] = new Error( $validation->errors()->all() );
-                return null;
-            }
-        }
-        else
+        if( !empty($post['detected']) )
         {
             $this->errorCollection[] = new Error("Simple bot detected.");
             return null;
         }
+
+        $validator = new \Rakit\Validation\Validator;
+        $validation = $validator->validate($post, [
+            "name"                  => "required",
+            "email"                 => "required|email",
+            "rating"                => "required|numeric|min:1|max:5",
+            "comment"               => "required|max:500",
+        ]);
+
+        if( $validation->fails() )
+        {
+            $this->errorCollection[] = new Error( $validation->errors()->all() );
+            return null;
+        }
+
+        $hblockEntity = \Bitrix\Highloadblock\HighloadBlockTable::compileEntity( $this->arParams["HBLOCK_ID"] );
+        $hblockDataClass = $hblockEntity->getDataClass();
+        $hblockFields = [
+            "UF_NAME"         => $post["name"],
+            "UF_EMAIL"        => $post["email"],
+            "UF_RATION"       => $post["rating"],
+            "UF_COMMENT"      => $post["comment"],
+        ];
+
+        $hblockResult = $hblockDataClass::add($hblockFields);
+
+        if( !$hblockResult->isSuccess() )
+        {   
+            throw new \Bitrix\Main\ObjectException( $hblockResult->getErrors() );
+        }
+        
+        $response["mail_id"] = $this->sendEmail($post);
+        return $response;
     }
 
     private function sendEmail($data)
@@ -107,23 +109,9 @@ class FeedbackService extends \CBitrixComponent implements \Bitrix\Main\Engine\C
         return \CEvent::Send("FEEDBACK_FORM", SITE_ID, $arMail);
     }
 
-    public function encodeParam($param)
-    {
-        return htmlspecialchars(json_encode(base64_encode($param)));
-    }
-
-    public function decodeParam($param)
-    {
-        return htmlspecialchars_decode(base64_decode(json_decode($param)));
-    }
-
     public function executeComponent()
     {
-        if($this->startResultCache())
-        {
-            $this->arResult["HBLOCK_ID"] = $this->encodeParam($this->arParams["HBLOCK_ID"]);
-            $this->includeComponentTemplate();
-        }
+        $this->includeComponentTemplate();
     }
 
     /**

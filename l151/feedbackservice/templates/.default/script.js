@@ -7,18 +7,19 @@ BX.ready(function()
 
 function sendAjForm(e)
 {
-    var ajFormData = {
+    let ajFormData = {
         'name'     :  $('#aj-form-name').val(),
         'email'    :  $('#aj-form-email').val(),
         'comment'  :  $('#aj-form-comment').val(),
-        'hblockid' :  $('#aj-form-hblockid').val(),
         'detected' :  $('#aj-form-detected').val(),
         'rating'   :  $('input.aj-form-rating:checked').val()   
     };
 
-    BX.ajax.runComponentAction('l151:feedbackservice',
+    //ajFormParams описан в template.php
+    BX.ajax.runComponentAction(ajFormParams.componentName,
         'sendForm', {
             mode: 'class',
+            signedParameters: ajFormParams.signedParameters,
             data: {post: ajFormData},
             type: 'POST',
             dataType: 'json',
