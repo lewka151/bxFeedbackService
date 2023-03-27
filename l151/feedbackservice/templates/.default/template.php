@@ -71,8 +71,8 @@ $this->addExternalJS("//cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/boot
 </div>
 
 <script>
-    var ajFormParams = <?=\Bitrix\Main\Web\Json::encode([
-      "componentName"     => $this->getComponent()->getName(),
-      "signedParameters"  => $this->getComponent()->getSignedParameters(),
-      ])?>;
+  var ajFormParams = <?=\Bitrix\Main\Web\Json::encode([
+    "componentName"     => $this->getComponent()->getName(),
+    "signedParameters"  => $this->getComponent()->getSignedParameters(),
+  ])?>;
 </script>
